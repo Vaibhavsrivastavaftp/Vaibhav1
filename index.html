@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Data Display</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            width: 100%;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Left Column (Table and Graph) */
+        .left-column {
+            width: 100%;
+            max-width: 700px;
+            padding-right: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Right Column (Add New Section) */
+        .right-column {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header */
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #3b4b56;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f4f6f9;
+        }
+
+        /* Hover effect for table rows */
+        table tr:hover {
+            background-color: #e6f1f8;
+        }
+
+        /* Show More Button */
+        #show-more-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background-color 0.3s;
+        }
+
+        #show-more-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Graph Section */
+        #graph-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #line-graph {
+            width: 100%;
+            height: 300px;
+            margin: 0 auto;
+        }
+
+        /* Logout Button */
+        #logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        #logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Add Row Section */
+        #add-row-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #add-row-section input {
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #save-new-row {
+            padding: 12px;
+            font-size: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: background-color 0.3s;
+        }
+
+        #save-new-row:hover {
+            background-color: #218838;
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .left-column {
+                width: 100%;
+                padding-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .right-column {
+                width: 100%;
+                margin-top: 20px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            table th, table td {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            #show-more-btn {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            #logout-btn {
+                top: 10px;
+                right: 10px;
+                font-size: 12px;
+            }
+
+            #add-row-section input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Logout Button -->
+    <button id="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+
+    <div class="container">
+        <!-- Left Column: Table and Graph -->
+        <div class="left-column">
+            <h1>Dynamic Data Table and Graph</h1>
+
+            <!-- Table -->
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Value</th>
+                        <th>Price</th>
+                        <th>Exchange</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data rows will be populated dynamically -->
+                </tbody>
+            </table>
+
+            <!-- Show More Button -->
+            <button id="show-more-btn">Show More</button>
+
+            <!-- Line Graph -->
+            <div id="graph-container">
+                <canvas id="line-graph"></canvas>
+            </div>
+        </div>
+
+        <!-- Right Column: Add New Section -->
+        <div class="right-column">
+            <h3>Add New Row</h3>
+
+            <!-- Add New Row Form -->
+            <div id="add-row-section">
+                <input type="text" id="new-date" placeholder="Enter Date">
+                <input type="text" id="new-value" placeholder="Enter Value">
+                <input type="text" id="new-price" placeholder="Enter Price">
+                <input type="text" id="new-exchange" placeholder="Enter Exchange">
+                <button id="save-new-row">Save</button>
+            </div>
+
+            <!-- New Added Rows Display -->
+            <div class="new-row-section">
+                <h4>Recently Added Rows</h4>
+                <table id="new-row-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Value</th>
+                            <th>Price</th>
+                            <th>Exchange</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Newly added rows will be displayed here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        const maxRows = 10; // Number of rows to show per click
+        let allData = []; // To store all fetched data
+        let newRows = []; // To store newly added rows
+
+        let chart; // To store the Chart.js instance
+
+        // Static data for testing
+        const staticData = [
+            { Date: '2025-01-01', Value: 100, Price: 1500, Exchange: 'NYSE' },
+            { Date: '2025-01-02', Value: 110, Price: 1600, Exchange: 'NASDAQ' },
+            { Date: '2025-01-03', Value: 105, Price: 1550, Exchange: 'BSE' },
+            // Add more rows as needed
+        ];
+
+        // Fetch data (using staticData for testing)
+        function fetchDataAndUpdate() {
+            allData = staticData; // Replace with actual API call
+            updateTable();
+            updateGraph(allData.map(row => row.Value));
+        }
+
+        // Function to update the table with the current data
+        function updateTable() {
+            const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+
+            for (let i = 0; i < Math.min(maxRows, allData.length); i++) {
+                const row = allData[i];
+                const tr = document.createElement('tr');
+
+                const tdDate = document.createElement('td');
+                tdDate.textContent = row.Date;
+
+                const tdValue = document.createElement('td');
+                tdValue.textContent = row.Value;
+
+                const tdPrice = document.createElement('td');
+                tdPrice.textContent = row.Price;
+
+                const tdExchange = document.createElement('td');
+                tdExchange.textContent = row.Exchange;
+
+                const tdAction = document.createElement('td');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.onclick = () => deleteRow(i);
+                tdAction.appendChild(deleteBtn);
+
+                tr.appendChild(tdDate);
+                tr.appendChild(tdValue);
+                tr.appendChild(tdPrice);
+                tr.appendChild(tdExchange);
+                tr.appendChild(tdAction);
+
+                tableBody.appendChild(tr);
+            }
+        }
+
+        // Function to delete a row and re-render the table and graph
+        function deleteRow(index) {
+            allData.splice(index, 1); // Remove the row from data
+            updateTable(); // Update table to reflect the deletion
+            updateGraph(allData.map(row => row.Value)); // Update graph dynamically
+        }
+
+        // Function to update the graph
+        function updateGraph(graphData) {
+            if (chart) {
+                chart.data.labels = allData.map(row => row.Date); // Update x-axis labels
+                chart.data.datasets[0].data = graphData; // Update y-axis data
+                chart.update(); // Update the chart
+            } else {
+                const ctx = document.getElementById('line-graph').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: allData.map(row => row.Date), // x-axis labels
+                        datasets: [{
+                            label: 'Stock Prices',
+                            data: graphData, // y-axis data
+                            borderColor: '#007BFF',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        // Show more button click handler
+        document.getElementById('show-more-btn').addEventListener('click', () => {
+            currentIndex += maxRows;
+            updateTable();
+        });
+
+        // Save new row
+        document.getElementById('save-new-row').addEventListener('click', () => {
+            const newRow = {
+                Date: document.getElementById('new-date').value,
+                Value: document.getElementById('new-value').value,
+                Price: document.getElementById('new-price').value,
+                Exchange: document.getElementById('new-exchange').value
+            };
+
+            newRows.push(newRow);
+            updateNewRowsTable();
+        });
+
+        // Update new rows table
+        function updateNewRowsTable() {
+            const tableBody = document.getElementById('new-row-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+
+            newRows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.Date}</td>
+                    <td>${row.Value}</td>
+                    <td>${row.Price}</td>
+                    <td>${row.Exchange}</td>
+                    <td><button class="delete-btn" onclick="deleteNewRow(${index})">Delete</button></td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Delete new row from the newRows array
+        function deleteNewRow(index) {
+            newRows.splice(index, 1);
+            updateNewRowsTable(); // Update new rows table
+        }
+
+        // Initial call to fetch data and render the table and graph
+        fetchDataAndUpdate();
+    </script>
+</body>
+</html>
